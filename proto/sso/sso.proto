@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "makhkets.go.v1;ssov1";
+
+// Импортируем другие .proto файлы
+import "sso/auth.proto";
+import "sso/user.proto";
+
+
+service Auth {
+  // Регистрация нового пользователя
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+
+  // Вход в систему
+  rpc Login (LoginRequest) returns (LoginResponse);
+
+
+  // Обновление токена (для долгосрочных сессий)
+  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
+
+  // Выявление всех авторизованных устройств на аккаунт
+  rpc GetDevices (GetDevicesRequest) returns (GetDevicesResponse);
+
+  // Выход из системы (инвалидация токена)
+  rpc Logout (LogoutRequest) returns (LogoutResponse);
+}
+
+service User {
+  // Назначение роли пользователю (для админов)
+  rpc AssignRole (AssignRoleRequest) returns (AssignRoleResponse);
+
+  // Удаление роли у пользователя (для админов)
+  // rpc RevokeRole (RevokeRoleRequest) returns (RevokeRoleResponse);
+
+  rpc ChangeAvatar (ChangeAvatarRequest) returns (ChangeAvatarResponse);
+  rpc ChangeUsername (ChangeUsernameRequest) returns (ChangeUsernameResponse);
+  rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc ChangeEmail (ChangeEmailRequest) returns (ChangeEmailResponse);
+}
+

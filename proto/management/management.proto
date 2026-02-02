@@ -1,0 +1,21 @@
+
+syntax = "proto3";
+
+package management;
+
+//option go_package = "makhkets.go.v1;ssov1";
+//
+//// Импортируем другие .proto файлы
+//import "sso/auth.proto";
+//import "sso/user.proto";
+
+
+service Management {
+  // работа с plans (тарифы)
+  // транзакции
+
+}
+
+//service User {
+//
+//}

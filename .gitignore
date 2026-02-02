@@ -1,0 +1,16 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+tmp/
+*.exe
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
