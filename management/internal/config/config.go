@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/makhkets/managment/pkg/database/postgres"
+	"github.com/makhkets/managment/pkg/directories"
 )
 
 type Config struct {
@@ -73,6 +75,9 @@ func fetchConfigPath() string {
 
 	if path == "" {
 		path = os.Getenv("CONFIG_PATH")
+		if path == "" {
+			path = filepath.Join(directories.FindDirectoryName("config"), "local.json")
+		}
 	}
 
 	return path

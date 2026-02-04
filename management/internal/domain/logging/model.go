@@ -2,9 +2,10 @@ package model_logging
 
 import (
 	"encoding/json"
-	"github.com/acarl005/stripansi"
 	"os"
 	"strings"
+
+	"github.com/acarl005/stripansi"
 )
 
 type LogEntry struct {

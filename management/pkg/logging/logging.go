@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	model_logging "github.com/makhkets/managment/domain/logging"
+	"github.com/makhkets/managment/internal/domain/logging"
 	"github.com/makhkets/managment/pkg/lib/logger/handlers/slogpretty"
 	"github.com/makhkets/managment/pkg/utils"
 )

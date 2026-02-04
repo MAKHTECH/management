@@ -1,59 +1,17 @@
-.PHONY: run dev build clean test lint tidy
-
 # Конфигурация
 CONFIG_PATH ?= ./config/local.json
 BINARY_NAME = main.exe
 BINARY_PATH = ./tmp/$(BINARY_NAME)
 CMD_PATH = ./cmd/main
 
-# docker-compose exec -it postgres psql -U makhkets -d management
+DOCKER_COMPOSE = ../deployments/docker/docker-compose.yml
 
-# Запуск с hot-reload (air)
-dev:
-	air
+postgres:
+	docker compose -f $(DOCKER_COMPOSE) up -d
 
-# Запуск без hot-reload
-run:
-	go run $(CMD_PATH) -config=$(CONFIG_PATH)
+psql:
+	docker compose -f $(DOCKER_COMPOSE) exec postgres psql -U makhkets -d management
 
-# Сборка
-build:
-	go build -o $(BINARY_PATH) $(CMD_PATH)
-
-# Запуск собранного бинарника
-start: build
-	$(BINARY_PATH) -config=$(CONFIG_PATH)
-
-# Очистка
-clean:
-	rm -rf ./tmp/*
-	go clean
-
-# Тесты
-test:
-	go test -v ./...
-
-# Линтер
-lint:
-	golangci-lint run
-
-# Обновление зависимостей
-tidy:
-	go mod tidy
-
-# Запуск с prod конфигом
-run-prod:
-	go run $(CMD_PATH) -config=./config/prod.json
-
-# Помощь
-help:
-	@echo "Доступные команды:"
-	@echo "  make dev       - Запуск с hot-reload (air)"
-	@echo "  make run       - Запуск без hot-reload"
-	@echo "  make build     - Сборка бинарника"
-	@echo "  make start     - Сборка и запуск"
-	@echo "  make clean     - Очистка tmp и кэша"
-	@echo "  make test      - Запуск тестов"
-	@echo "  make lint      - Запуск линтера"
-	@echo "  make tidy      - go mod tidy"
-	@echo "  make run-prod  - Запуск с prod конфигом"
+generate:
+	@powershell -NoProfile -Command "if (-Not (Test-Path -Path '../proto/gen/go')) { New-Item -ItemType Directory -Force -Path '../proto/gen/go' | Out-Null }"
+	protoc -I ../proto --go_out=../proto/gen/go --go_opt=paths=source_relative --go-grpc_out=../proto/gen/go --go-grpc_opt=paths=source_relative ../proto/management/*.proto ../proto/sso/*.proto

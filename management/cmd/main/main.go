@@ -5,11 +5,14 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/makhkets/managment/cmd/migrator"
 	"github.com/makhkets/managment/internal/config"
 	"github.com/makhkets/managment/pkg/database/postgres"
+	"github.com/makhkets/managment/pkg/directories"
 	"github.com/makhkets/managment/pkg/logging"
 )
 
@@ -25,9 +28,30 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	db, err := postgres.New(ctx, cfg.Database.ToPostgresConfig())
+	pgCfg := cfg.Database.ToPostgresConfig()
+	postgresPort, _ := strconv.Atoi(cfg.Database.Port)
+	db, err := postgres.New(ctx, pgCfg)
 	if err != nil {
 		slog.Error("failed to connect to database", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	// Применяем миграции при старте приложения
+	migrationsPath := directories.FindDirectoryName("migrations")
+	err = migrator.ApplyMigrations(
+		migrator.PostgresConfig{
+			Host:     pgCfg.Host,
+			Port:     postgresPort,
+			User:     pgCfg.User,
+			Password: pgCfg.Password,
+			DBName:   pgCfg.DBName,
+			SSLMode:  pgCfg.SSLMode,
+		},
+		migrationsPath,
+		"migrations",
+	)
+	if err != nil {
+		slog.Error("failed to apply migrations", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
