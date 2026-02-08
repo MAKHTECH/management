@@ -9,18 +9,19 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/makhkets/managment/pkg/database/postgres"
-	"github.com/makhkets/managment/pkg/directories"
+	"github.com/makhtech/management/internal/repository/postgres"
+	"github.com/makhtech/management/pkg/directories"
 )
 
 type Config struct {
 	Env      string         `json:"env"`
 	GRPC     GRPCConfig     `json:"grpc"`
-	Database DatabaseConfig `json:"database"`
+	Database DatabaseConfig `json:"repository"`
 }
 
 type GRPCConfig struct {
-	Address string `json:"address"`
+	//Address string `json:"address"`
+	Port int
 }
 
 type DatabaseConfig struct {

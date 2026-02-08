@@ -80,7 +80,7 @@ func New(ctx context.Context, cfg *Config) (*Database, error) {
 	slog.Info("postgres: connected successfully",
 		slog.String("host", cfg.Host),
 		slog.String("port", cfg.Port),
-		slog.String("database", cfg.DBName),
+		slog.String("repository", cfg.DBName),
 	)
 
 	return db, nil

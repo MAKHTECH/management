@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package management;
+
+option go_package = "github.com/makhkets/management/pkg/api/management/v1;managementv1";
+
+import "google/protobuf/timestamp.proto";
+import "management/plan.proto";
+import "management/node.proto";
+
+// ============================================================================
+// MESSAGES - VDS (Virtual Dedicated Servers)
+// ============================================================================
+
+enum VDSStatus {
+  VDS_STATUS_UNKNOWN = 0;
+  VDS_STATUS_CREATING = 1;
+  VDS_STATUS_RUNNING = 2;
+  VDS_STATUS_STOPPED = 3;
+  VDS_STATUS_ERROR = 4;
+  VDS_STATUS_DELETING = 5;
+}
+
+message VDS {
+  int32 id = 1;
+  int32 user_id = 2;
+  int32 plan_id = 3;
+  int32 node_id = 4;
+  int32 proxmox_vm_id = 5;
+  VDSStatus status = 6;
+  string ipv4 = 7;
+  string ipv6 = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp expires_at = 10;
+}
+
+message VDSWithDetails {
+  int32 id = 1;
+  int32 user_id = 2;
+  int32 proxmox_vm_id = 3;
+  VDSStatus status = 4;
+  string ipv4 = 5;
+  string ipv6 = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp expires_at = 8;
+  Plan plan = 9;
+  Node node = 10;
+}
+
+message CreateVDSRequest {
+  int32 user_id = 1;
+  int32 plan_id = 2;
+  int32 node_id = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+message GetVDSRequest {
+  int32 id = 1;
+}
+
+message ListVDSByUserRequest {
+  int32 user_id = 1;
+}
+
+message ListVDSResponse {
+  repeated VDS vds = 1;
+}
+
+message UpdateVDSStatusRequest {
+  int32 id = 1;
+  VDSStatus status = 2;
+}
+
+message AllocateIPRequest {
+  int32 vds_id = 1;
+  string ipv4 = 2;
+  string ipv6 = 3;
+}
+
+message DeleteVDSRequest {
+  int32 id = 1;
+}

@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package management;
+
+option go_package = "github.com/makhkets/management/pkg/api/management/v1;managementv1";
+
+import "google/protobuf/timestamp.proto";
+
+// ============================================================================
+// MESSAGES - Tasks
+// ============================================================================
+
+enum TaskType {
+  TASK_TYPE_UNKNOWN = 0;
+  TASK_TYPE_CREATE = 1;
+  TASK_TYPE_DELETE = 2;
+  TASK_TYPE_START = 3;
+  TASK_TYPE_STOP = 4;
+  TASK_TYPE_RESTART = 5;
+}
+
+enum TaskStatus {
+  TASK_STATUS_UNKNOWN = 0;
+  TASK_STATUS_PENDING = 1;
+  TASK_STATUS_RUNNING = 2;
+  TASK_STATUS_DONE = 3;
+  TASK_STATUS_ERROR = 4;
+}
+
+message Task {
+  int32 id = 1;
+  int32 vds_id = 2;
+  TaskType type = 3;
+  TaskStatus status = 4;
+  string error = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp started_at = 7;
+  google.protobuf.Timestamp completed_at = 8;
+}
+
+message CreateTaskRequest {
+  int32 vds_id = 1;
+  TaskType type = 2;
+}
+
+message GetTaskRequest {
+  int32 id = 1;
+}
+
+message ListTasksByVDSRequest {
+  int32 vds_id = 1;
+}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+}
+
+message UpdateTaskStatusRequest {
+  int32 id = 1;
+  TaskStatus status = 2;
+  optional string error = 3;
+}
+
+message GetPendingTasksCountRequest {
+  int32 vds_id = 1;
+}
+
+message GetPendingTasksCountResponse {
+  int32 count = 1;
+}

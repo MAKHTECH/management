@@ -1,9 +1,10 @@
 {
   "env": "local",
   "grpc": {
-    "address": "localhost:50051"
+    "address": "localhost:50051",
+    "port": 50051
   },
-  "database": {
+  "repository": {
     "host": "localhost",
     "port": "5433",
     "user": "makhkets",

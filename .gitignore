@@ -1,3 +1,6 @@
+# my files
+makefile
+
 # Environment files
 .env
 .env.local
@@ -13,4 +16,88 @@ tmp/
 
 # Logs
 *.log
+
+# -------------------------
+# Additional common ignores
+# -------------------------
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor temporary and swap files
+*~
+*.swp
+*.swo
+*.swn
+.*.swp
+*.bak
+*.orig
+*.tmp
+
+# JetBrains / IntelliJ
+*.iml
+*.ipr
+*.iws
+
+# Build directories and outputs
+/bin/
+/pkg/
+/build/
+/dist/
+/out/
+*.out
+*.test
+coverage.out
+*.coverprofile
+
+# Go / modules / vendor
+vendor/
+Godeps/
+go-build/
+
+# Docker
+docker-compose.override.yml
+.docker/
+docker-compose.*.yml
+
+# Kubernetes / kubeconfig
+.kube/
+*.kubeconfig
+
+# Terraform
+.terraform/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Secrets and keys
+*.pem
+*.key
+*.crt
+.secret
+.envrc
+
+# Misc
+logs/
+*.log.*
+.sass-cache/
+.cache/
+
+# Keep local IDE/private project files out
+*.sublime-workspace
+*.sublime-project
+.project
+.metadata
 

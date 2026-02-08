@@ -9,11 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/makhkets/managment/cmd/migrator"
-	"github.com/makhkets/managment/internal/config"
-	"github.com/makhkets/managment/pkg/database/postgres"
-	"github.com/makhkets/managment/pkg/directories"
-	"github.com/makhkets/managment/pkg/logging"
+	"github.com/makhtech/management/cmd/migrator"
+	"github.com/makhtech/management/internal/app"
+	"github.com/makhtech/management/internal/config"
+	"github.com/makhtech/management/internal/repository/postgres"
+	"github.com/makhtech/management/pkg/directories"
+	"github.com/makhtech/management/pkg/logging"
 )
 
 func main() {
@@ -22,7 +23,7 @@ func main() {
 	cfg := config.MustLoad()
 
 	slog.Info("starting application",
-		slog.String("env", cfg.Env),
+		slog.Any("config", cfg),
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -32,7 +33,7 @@ func main() {
 	postgresPort, _ := strconv.Atoi(cfg.Database.Port)
 	db, err := postgres.New(ctx, pgCfg)
 	if err != nil {
-		slog.Error("failed to connect to database", slog.String("error", err.Error()))
+		slog.Error("failed to connect to repository", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
@@ -55,10 +56,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	slog.Info("database pool stats",
+	slog.Info("repository pool stats",
 		slog.Int("total_conns", int(db.Stats().TotalConns())),
 		slog.Int("idle_conns", int(db.Stats().IdleConns())),
 	)
+
+	application := app.New(cfg)
+	go application.GRPCSrv.MustRun()
+
+	slog.Info("GRPC server is running on port", slog.Int("port", cfg.GRPC.Port))
 
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)

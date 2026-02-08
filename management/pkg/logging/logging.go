@@ -4,9 +4,9 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/makhkets/managment/internal/domain/logging"
-	"github.com/makhkets/managment/pkg/lib/logger/handlers/slogpretty"
-	"github.com/makhkets/managment/pkg/utils"
+	model_logging "github.com/makhtech/management/internal/domain/logging"
+	"github.com/makhtech/management/pkg/lib/logger/handlers/slogpretty"
+	"github.com/makhtech/management/pkg/utils"
 )
 
 func SetupLogger() {

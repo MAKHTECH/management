@@ -5,11 +5,11 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  args_bin = ["-config", "./config/local.json"]
-  bin = "tmp\\main.exe"
-  cmd = "go build -o ./tmp/main.exe ./cmd/main"
+  args_bin = ["-config", "./management/config/local.json"]
+  bin = "management\\tmp\\main.exe"
+  cmd = "go build -o ./management/tmp/main.exe ./management/cmd/main"
   delay = 1000
-  entrypoint = ["tmp\\main.exe"]
+  entrypoint = ["management\\tmp\\main.exe"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
   exclude_regex = ["_test.go"]
@@ -20,7 +20,7 @@ tmp_dir = "tmp"
   include_ext = ["go", "tpl", "tmpl", "html"]
   include_file = []
   kill_delay = "0s"
-  log = "tmp/build-errors.log"
+  log = "management/tmp/build-errors.log"
   poll = false
   poll_interval = 0
   post_cmd = []

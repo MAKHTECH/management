@@ -3,19 +3,50 @@ syntax = "proto3";
 
 package management;
 
-//option go_package = "makhkets.go.v1;ssov1";
-//
-//// Импортируем другие .proto файлы
-//import "sso/auth.proto";
-//import "sso/user.proto";
+option go_package = "github.com/makhtech/management/pkg/api/management/v1;managementv1";
 
+import "google/protobuf/empty.proto";
+
+// Импорт сообщений из отдельных файлов
+import "management/plan.proto";
+import "management/node.proto";
+import "management/vds.proto";
+import "management/task.proto";
+
+// ============================================================================
+// SERVICE - Management
+// ============================================================================
 
 service Management {
-  // работа с plans (тарифы)
-  // транзакции
+  // === PLAN Operations ===
+  // for admin endpoints
+  rpc CreatePlan(CreatePlanRequest) returns (Plan);
+  rpc GetPlan(GetPlanRequest) returns (Plan);
+  rpc UpdatePlan(UpdatePlanRequest) returns (Plan);
+  rpc ListPlans(ListPlansRequest) returns (ListPlansResponse);
+  rpc DeletePlan(GetPlanRequest) returns (google.protobuf.Empty);
 
+  // === NODE Operations ===
+  rpc CreateNode(CreateNodeRequest) returns (Node);
+  rpc GetNode(GetNodeRequest) returns (Node);
+  rpc UpdateNode(UpdateNodeRequest) returns (Node);
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
+  rpc DeleteNode(GetNodeRequest) returns (google.protobuf.Empty);
+  rpc GetNodeUtilization(GetNodeRequest) returns (NodeUtilization);
+
+  // === VDS Operations ===
+  rpc CreateVDS(CreateVDSRequest) returns (VDS);
+  rpc GetVDS(GetVDSRequest) returns (VDS);
+  rpc ListVDSByUser(ListVDSByUserRequest) returns (ListVDSResponse);
+  rpc UpdateVDSStatus(UpdateVDSStatusRequest) returns (VDS);
+  rpc AllocateIP(AllocateIPRequest) returns (VDS);
+  rpc DeleteVDS(DeleteVDSRequest) returns (google.protobuf.Empty);
+
+  // === TASK Operations ===
+  rpc CreateTask(CreateTaskRequest) returns (Task);
+  rpc GetTask(GetTaskRequest) returns (Task);
+  rpc ListTasksByVDS(ListTasksByVDSRequest) returns (ListTasksResponse);
+  rpc UpdateTaskStatus(UpdateTaskStatusRequest) returns (Task);
+  rpc GetPendingTasksCount(GetPendingTasksCountRequest) returns (GetPendingTasksCountResponse);
 }
 
-//service User {
-//
-//}

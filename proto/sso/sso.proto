@@ -7,6 +7,7 @@ option go_package = "makhkets.go.v1;ssov1";
 // Импортируем другие .proto файлы
 import "sso/auth.proto";
 import "sso/user.proto";
+import "sso/transactions.proto";
 
 
 service Auth {
@@ -15,7 +16,6 @@ service Auth {
 
   // Вход в систему
   rpc Login (LoginRequest) returns (LoginResponse);
-
 
   // Обновление токена (для долгосрочных сессий)
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
@@ -28,15 +28,43 @@ service Auth {
 }
 
 service User {
+  // --- FOR ADMIN ---
   // Назначение роли пользователю (для админов)
   rpc AssignRole (AssignRoleRequest) returns (AssignRoleResponse);
 
   // Удаление роли у пользователя (для админов)
   // rpc RevokeRole (RevokeRoleRequest) returns (RevokeRoleResponse);
 
+  // --- FOR USER ---
+  rpc ValidateJWT (ValidateJWTRequest) returns (ValidateJWTResponse);
   rpc ChangeAvatar (ChangeAvatarRequest) returns (ChangeAvatarResponse);
   rpc ChangeUsername (ChangeUsernameRequest) returns (ChangeUsernameResponse);
   rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse);
   rpc ChangeEmail (ChangeEmailRequest) returns (ChangeEmailResponse);
 }
 
+service Transactions {
+  // --- BALANCE OPERATIONS (Two-Phase Commit Pattern) ---
+  // Документация:
+  // 1. Reserve - замораживает средства (balance -> reserved_balance) + проверка баланса
+  // 2. CommitReserve - списывает замороженные средства (уменьшает reserved_balance)
+  // 3. CancelReserve - размораживает средства (reserved_balance -> balance)
+
+  // Резервирование (заморозка) средств - включает проверку баланса
+  rpc Reserve (ReserveRequest) returns (ReserveResponse);
+
+  // Подтверждение списания зарезервированных средств
+  rpc CommitReserve (CommitReserveRequest) returns (CommitReserveResponse);
+
+  // Отмена резервирования (разморозка средств)
+  rpc CancelReserve (CancelReserveRequest) returns (CancelReserveResponse);
+
+  // Получение баланса пользователя
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
+
+  // Пополнение баланса (для платежных систем / админов)
+  rpc Deposit (DepositRequest) returns (DepositResponse);
+
+  // История транзакций пользователя
+  rpc GetTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+}
