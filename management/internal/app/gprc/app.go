@@ -6,17 +6,22 @@ import (
 	"log/slog"
 	"net"
 
+	"github.com/makhtech/management/internal/clients/sso"
 	"github.com/makhtech/management/internal/config"
+	grpcInt "github.com/makhtech/management/internal/grpc"
+	"github.com/makhtech/management/internal/service"
+	"github.com/makhtech/management/pkg/ratelimiter"
+	managementv1 "github.com/makhtech/proto/gen/go/management"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type App struct {
-	gRPCServer *grpc.Server
-	port       int
+	gRPCServer      *grpc.Server
+	port            int
+	authInterceptor *grpcInt.AuthInterceptor
 }
 
-// Добавление несколько interceptors
 func chainUnaryInterceptors(interceptors ...grpc.UnaryServerInterceptor) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		var chainHandler grpc.UnaryHandler = handler
@@ -31,20 +36,57 @@ func chainUnaryInterceptors(interceptors ...grpc.UnaryServerInterceptor) grpc.Un
 	}
 }
 
-func New(cfg *config.Config) *App {
+func chainStreamInterceptors(interceptors ...grpc.StreamServerInterceptor) grpc.StreamServerInterceptor {
+	return func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		var chainHandler grpc.StreamHandler = handler
+		for i := len(interceptors) - 1; i >= 0; i-- {
+			innerHandler := chainHandler
+			currentInterceptor := interceptors[i]
+			chainHandler = func(currentSrv interface{}, currentStream grpc.ServerStream) error {
+				return currentInterceptor(currentSrv, currentStream, info, innerHandler)
+			}
+		}
+		return chainHandler(srv, stream)
+	}
+}
 
-	gRPCServer := grpc.NewServer()
+func New(cfg *config.Config, ssoClient *sso.Client, rateLimiter *ratelimiter.TokenBucket, planSvc service.PlanService) *App {
+	var opts []grpc.ServerOption
+	var authInterceptor *grpcInt.AuthInterceptor
+
+	if ssoClient != nil {
+		authInterceptor = grpcInt.NewAuthInterceptor(ssoClient, rateLimiter)
+
+		authInterceptor.SetPublicMethods(
+			"/management.Management/ListPlans",
+			"/management.Management/GetPlan",
+		)
+
+		opts = append(opts,
+			grpc.UnaryInterceptor(authInterceptor.UnaryInterceptor()),
+			grpc.StreamInterceptor(authInterceptor.StreamInterceptor()),
+		)
+
+		slog.Info("auth interceptor enabled with rate limiting")
+	} else {
+		slog.Warn("auth interceptor disabled - SSO client not available")
+	}
+
+	gRPCServer := grpc.NewServer(opts...)
 
 	// Включаем серверную рефлексию (полезно для отладки)
 	reflection.Register(gRPCServer)
 
-	// todo зарегать сервисы
-	//grpc_auth.Register(gRPCServer, auth)
-	//gprc_user.Register(gRPCServer, user)
+	// Регистрируем сервисы
+	serverAPI := grpcInt.NewServerAPI(planSvc)
+	managementv1.RegisterManagementServer(gRPCServer, serverAPI)
+
+	slog.Info("management service registered")
 
 	return &App{
-		port:       cfg.GRPC.Port,
-		gRPCServer: gRPCServer,
+		port:            cfg.GRPC.Port,
+		gRPCServer:      gRPCServer,
+		authInterceptor: authInterceptor,
 	}
 }
 

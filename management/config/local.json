@@ -4,6 +4,16 @@
     "address": "localhost:50051",
     "port": 50051
   },
+  "sso": {
+    "address": "localhost:50052",
+    "timeout": "5s",
+    "insecure": true
+  },
+  "rate_limiter": {
+    "rate": 10,
+    "capacity": 20,
+    "cleanup_interval": "5m"
+  },
   "repository": {
     "host": "localhost",
     "port": "5433",

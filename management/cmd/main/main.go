@@ -61,7 +61,7 @@ func main() {
 		slog.Int("idle_conns", int(db.Stats().IdleConns())),
 	)
 
-	application := app.New(cfg)
+	application := app.New(cfg, db)
 	go application.GRPCSrv.MustRun()
 
 	slog.Info("GRPC server is running on port", slog.Int("port", cfg.GRPC.Port))

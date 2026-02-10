@@ -14,9 +14,26 @@ import (
 )
 
 type Config struct {
-	Env      string         `json:"env"`
-	GRPC     GRPCConfig     `json:"grpc"`
-	Database DatabaseConfig `json:"repository"`
+	Env         string            `json:"env"`
+	GRPC        GRPCConfig        `json:"grpc"`
+	Database    DatabaseConfig    `json:"repository"`
+	SSO         SSOConfig         `json:"sso"`
+	RateLimiter RateLimiterConfig `json:"rate_limiter"`
+}
+
+type SSOConfig struct {
+	Address  string `json:"address"`
+	Timeout  string `json:"timeout"`
+	Insecure bool   `json:"insecure"`
+}
+
+type RateLimiterConfig struct {
+	// Rate количество запросов в секунду на один access token
+	Rate int `json:"rate"`
+	// Capacity максимальное количество накопленных запросов (burst)
+	Capacity int `json:"capacity"`
+	// CleanupInterval интервал очистки неактивных buckets
+	CleanupInterval string `json:"cleanup_interval"`
 }
 
 type GRPCConfig struct {
@@ -110,4 +127,28 @@ func parseDuration(s string, defaultVal time.Duration) time.Duration {
 		return defaultVal
 	}
 	return d
+}
+
+// ToSSOClientConfig преобразует SSOConfig в конфигурацию для SSO клиента
+func (c *SSOConfig) ToSSOClientConfig() (address string, timeout time.Duration, insecure bool) {
+	return c.Address, parseDuration(c.Timeout, 5*time.Second), c.Insecure
+}
+
+// ToRateLimiterConfig преобразует RateLimiterConfig для пакета ratelimiter
+func (c *RateLimiterConfig) GetRate() int {
+	if c.Rate <= 0 {
+		return 10 // default: 10 requests per second
+	}
+	return c.Rate
+}
+
+func (c *RateLimiterConfig) GetCapacity() int {
+	if c.Capacity <= 0 {
+		return c.GetRate() * 2 // default: 2x rate
+	}
+	return c.Capacity
+}
+
+func (c *RateLimiterConfig) GetCleanupInterval() time.Duration {
+	return parseDuration(c.CleanupInterval, 5*time.Minute)
 }
